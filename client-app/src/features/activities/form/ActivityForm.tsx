@@ -5,13 +5,14 @@ import { Activity } from '../../../app/layout/models/activity';
 interface Props {
   activity: Activity | undefined;
   handleForm: () => void;
+  createOrEditActivity: (activity: Activity) => void;
 }
 
-const ActivityForm = ({ activity: selectedActivity, handleForm }: Props) => {
-  const handleFormSubmit = () => {
-    console.log('Submitted!', { activity });
-  };
-
+const ActivityForm = ({
+  activity: selectedActivity,
+  handleForm,
+  createOrEditActivity,
+}: Props) => {
   const initialState = selectedActivity ?? {
     id: '',
     title: '',
@@ -29,6 +30,10 @@ const ActivityForm = ({ activity: selectedActivity, handleForm }: Props) => {
   ) => {
     const { name, value } = event.target;
     setActivity({ ...activity, [name]: value });
+  };
+
+  const handleFormSubmit = () => {
+    createOrEditActivity(activity);
   };
 
   return (

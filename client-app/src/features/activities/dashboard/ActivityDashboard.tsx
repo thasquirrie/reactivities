@@ -4,6 +4,7 @@ import { Activity } from '../../../app/layout/models/activity';
 import ActivityList from './ActivityList';
 import ActivityDetails from '../details/ActivityDetails';
 import ActivityForm from '../form/ActivityForm';
+import { v4 as uuid } from 'uuid';
 
 interface Props {
   activities: Activity[];
@@ -16,12 +17,12 @@ const ActivityDashboard = ({
   activities,
   openForm,
   setOpenForm,
-}: // selectedActivity,
-// selectActivity,
-Props) => {
+  setActivities,
+}: Props) => {
   const [selectedActivity, setSelectedActivity] = useState<
     Activity | undefined
   >(undefined);
+
   const [selectEdit, setSelectedEdit] = useState(false);
 
   const handleSelectActivity = (activity: Activity) => {
@@ -45,7 +46,28 @@ Props) => {
     setSelectedActivity(undefined);
   };
 
-  console.log({ selectEdit, selectedActivity });
+  const createOrEditActivity = (activity: Activity) => {
+    console.log('ID:', activity.id, { activity });
+    activity.id
+      ? setActivities([
+          ...activities.filter(
+            (filteredActivity) => filteredActivity.id !== activity.id
+          ),
+          activity,
+        ])
+      : setActivities([...activities, { ...activity, id: uuid() }]);
+    setSelectedEdit(false);
+    setOpenForm(false);
+    setSelectedActivity(activity);
+  };
+
+  const deleteActivity = (activity: Activity) => {
+    setActivities([
+      ...activities.filter(
+        (filteredActivity) => filteredActivity.id !== activity.id
+      ),
+    ]);
+  };
 
   return (
     <Grid>
@@ -53,6 +75,7 @@ Props) => {
         <ActivityList
           activities={activities}
           handleSelectActivity={handleSelectActivity}
+          deleteActivity={deleteActivity}
         />
       </Grid.Column>
       <Grid.Column width={'6'}>
@@ -66,7 +89,11 @@ Props) => {
         )}
         {(selectEdit || openForm) && (
           // <ActivityForm activity={selectedActivity} />
-          <ActivityForm activity={selectedActivity} handleForm={handleForm} />
+          <ActivityForm
+            activity={selectedActivity}
+            handleForm={handleForm}
+            createOrEditActivity={createOrEditActivity}
+          />
         )}
       </Grid.Column>
     </Grid>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button, Container } from 'semantic-ui-react';
+import { Container } from 'semantic-ui-react';
 import { Activity } from './models/activity';
 import Navbar from './Navbar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
@@ -40,7 +40,6 @@ function App() {
           setOpenForm={setOpenForm}
           setActivities={setActivities}
         />
-        <Button content='Text' />
       </Container>
     </>
   );
