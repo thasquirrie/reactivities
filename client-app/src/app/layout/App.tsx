@@ -7,6 +7,11 @@ import ActivityDashboard from '../../features/activities/dashboard/ActivityDashb
 
 function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [openForm, setOpenForm] = useState<Boolean>(false);
+
+  const handleOpenForm = () => {
+    setOpenForm(!openForm);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,9 +32,14 @@ function App() {
 
   return (
     <>
-      <Navbar />
+      <Navbar handleOpenForm={handleOpenForm} />
       <Container style={{ marginTop: '7em' }}>
-        <ActivityDashboard activities={activities} />
+        <ActivityDashboard
+          activities={activities}
+          openForm={openForm}
+          setOpenForm={setOpenForm}
+          setActivities={setActivities}
+        />
         <Button content='Text' />
       </Container>
     </>
