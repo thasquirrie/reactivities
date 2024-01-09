@@ -5,6 +5,7 @@ import ActivityList from './ActivityList';
 import ActivityDetails from '../details/ActivityDetails';
 import ActivityForm from '../form/ActivityForm';
 import { v4 as uuid } from 'uuid';
+import agent from '../../../app/layout/api/agent';
 
 interface Props {
   activities: Activity[];
@@ -24,12 +25,12 @@ const ActivityDashboard = ({
   >(undefined);
 
   const [selectEdit, setSelectedEdit] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSelectActivity = (activity: Activity) => {
     setSelectedActivity(activity);
     selectEdit && setSelectedEdit(!selectEdit);
     openForm && setOpenForm(!openForm);
-    console.log({ selectEdit });
   };
 
   const handleUnselectActivity = () => {
@@ -46,27 +47,39 @@ const ActivityDashboard = ({
     setSelectedActivity(undefined);
   };
 
-  const createOrEditActivity = (activity: Activity) => {
-    console.log('ID:', activity.id, { activity });
-    activity.id
-      ? setActivities([
-          ...activities.filter(
-            (filteredActivity) => filteredActivity.id !== activity.id
-          ),
-          activity,
-        ])
-      : setActivities([...activities, { ...activity, id: uuid() }]);
+  const createOrEditActivity = async (activity: Activity) => {
+    setSubmitting(true);
+
+    if (activity.id) {
+      await agent.Activities.update(activity);
+      setActivities([
+        ...activities.filter(
+          (filteredActivity) => filteredActivity.id !== activity.id
+        ),
+        activity,
+      ]);
+    } else {
+      activity.id = uuid();
+      await agent.Activities.create(activity);
+      setActivities([...activities, activity]);
+    }
+
     setSelectedEdit(false);
     setOpenForm(false);
     setSelectedActivity(activity);
+    setSubmitting(false);
   };
 
-  const deleteActivity = (activity: Activity) => {
+  const deleteActivity = async (activity: Activity) => {
+    setSubmitting(true);
+
+    await agent.Activities.delete(activity.id);
     setActivities([
       ...activities.filter(
         (filteredActivity) => filteredActivity.id !== activity.id
       ),
     ]);
+    setSubmitting(false);
   };
 
   return (
@@ -76,6 +89,7 @@ const ActivityDashboard = ({
           activities={activities}
           handleSelectActivity={handleSelectActivity}
           deleteActivity={deleteActivity}
+          submitting={submitting}
         />
       </Grid.Column>
       <Grid.Column width={'6'}>
@@ -93,6 +107,7 @@ const ActivityDashboard = ({
             activity={selectedActivity}
             handleForm={handleForm}
             createOrEditActivity={createOrEditActivity}
+            submitting={submitting}
           />
         )}
       </Grid.Column>

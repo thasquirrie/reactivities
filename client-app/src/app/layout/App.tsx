@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container } from 'semantic-ui-react';
 import { Activity } from './models/activity';
 import Navbar from './Navbar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
+import agent from './api/agent';
+import LoadingComponents from './LoadingComponents';
 
 function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [openForm, setOpenForm] = useState<Boolean>(false);
+  const [loading, setLoading] = useState(true);
 
   const handleOpenForm = () => {
     setOpenForm(!openForm);
@@ -15,22 +17,17 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await axios<Activity[]>({
-        method: 'GET',
-        url: 'http://localhost:5000/api/activities',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
-
+      const data = await agent.Activities.list();
       setActivities(data);
+      setLoading(false);
     };
 
     fetchData();
   }, []);
 
-  return (
+  return loading ? (
+    <LoadingComponents content='Loading app' />
+  ) : (
     <>
       <Navbar handleOpenForm={handleOpenForm} />
       <Container style={{ marginTop: '7em' }}>

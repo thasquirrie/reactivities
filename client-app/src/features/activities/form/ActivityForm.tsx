@@ -6,12 +6,14 @@ interface Props {
   activity: Activity | undefined;
   handleForm: () => void;
   createOrEditActivity: (activity: Activity) => void;
+  submitting: boolean;
 }
 
 const ActivityForm = ({
   activity: selectedActivity,
   handleForm,
   createOrEditActivity,
+  submitting,
 }: Props) => {
   const initialState = selectedActivity ?? {
     id: '',
@@ -59,6 +61,7 @@ const ActivityForm = ({
         />
         <Form.Input
           placeholder='Date'
+          type='date'
           value={activity?.date}
           name='date'
           onChange={handleOnChange}
@@ -75,7 +78,13 @@ const ActivityForm = ({
           name='venue'
           onChange={handleOnChange}
         />
-        <Button floated='right' positive type='submit' content='Submit' />
+        <Button
+          floated='right'
+          positive
+          type='submit'
+          content='Submit'
+          loading={submitting}
+        />
         <Button
           onClick={handleForm}
           floated='right'
