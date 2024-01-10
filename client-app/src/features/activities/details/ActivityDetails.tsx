@@ -1,43 +1,37 @@
 import React from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
-import { Activity } from '../../../app/layout/models/activity';
+import { useStore } from '../../../app/stores/store';
 
-interface Props {
-  // selectedActivity: Activity;
-  activity: Activity;
-  handleUnselectActivity: () => void;
-  handleEditActivity: () => void;
-  selectEdit: Boolean;
-}
-
-const ActivityDetails = ({
-  activity,
-  handleUnselectActivity,
-  handleEditActivity,
-  selectEdit,
-}: Props) => {
+const ActivityDetails = () => {
+  const {
+    activityStore: {
+      selectedActivity: activity,
+      cancelSelectActivity,
+      handleOpenForm,
+    },
+  } = useStore();
   return (
     <Card fluid>
-      <Image src={`/assets/categoryImages/${activity.category}.jpg`} />
+      <Image src={`/assets/categoryImages/${activity?.category}.jpg`} />
       <Card.Content>
-        <Card.Header>{activity.title}</Card.Header>
+        <Card.Header>{activity?.title}</Card.Header>
         <Card.Meta>
-          <span>{activity.date}</span>
+          <span>{activity?.date}</span>
         </Card.Meta>
-        <Card.Description>{activity.description}</Card.Description>
+        <Card.Description>{activity?.description}</Card.Description>
       </Card.Content>
       <Card.Content extra>
         <Button.Group widths={'2'}>
           <Button
-            onClick={() => handleEditActivity()}
+            onClick={() => handleOpenForm(activity)}
             basic
             color='blue'
             content='Edit'
           />
           <Button
             onClick={() => {
-              handleUnselectActivity();
-              selectEdit && handleEditActivity();
+              // selectEdit && handleEditActivity();
+              cancelSelectActivity();
             }}
             basic
             color='grey'

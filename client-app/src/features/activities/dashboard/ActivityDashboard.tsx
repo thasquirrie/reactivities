@@ -1,74 +1,69 @@
 import React, { useState } from 'react';
 import { Grid } from 'semantic-ui-react';
-import { Activity } from '../../../app/layout/models/activity';
+import { Activity } from '../../../app/models/activity';
 import ActivityList from './ActivityList';
 import ActivityDetails from '../details/ActivityDetails';
 import ActivityForm from '../form/ActivityForm';
-import { v4 as uuid } from 'uuid';
-import agent from '../../../app/layout/api/agent';
+import agent from '../../../app/api/agent';
+import { useStore } from '../../../app/stores/store';
+import { observer } from 'mobx-react-lite';
 
 interface Props {
   activities: Activity[];
   setActivities: React.Dispatch<React.SetStateAction<Activity[]>>;
-  openForm: Boolean;
-  setOpenForm: React.Dispatch<React.SetStateAction<Boolean>>;
 }
 
-const ActivityDashboard = ({
-  activities,
-  openForm,
-  setOpenForm,
-  setActivities,
-}: Props) => {
-  const [selectedActivity, setSelectedActivity] = useState<
-    Activity | undefined
-  >(undefined);
+const ActivityDashboard = ({ activities, setActivities }: Props) => {
+  const { activityStore } = useStore();
+  // const [selectedActivity, setSelectedActivity] = useState<
+  //   Activity | undefined
+  // >(undefined);
 
-  const [selectEdit, setSelectedEdit] = useState(false);
+  // const [selectEdit, setSelectedEdit] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSelectActivity = (activity: Activity) => {
-    setSelectedActivity(activity);
-    selectEdit && setSelectedEdit(!selectEdit);
-    openForm && setOpenForm(!openForm);
-  };
+  // const handleSelectActivity = (activity: Activity) => {
+  //   setSelectedActivity(activity);
+  //   selectEdit && setSelectedEdit(!selectEdit);
+  //   openForm && setOpenForm(!openForm);
+  // };
 
-  const handleUnselectActivity = () => {
-    setSelectedActivity(undefined);
-  };
+  // const handleUnselectActivity = () => {
+  //   setSelectedActivity(undefined);
+  // };
 
-  const handleEditActivity = () => {
-    setSelectedEdit(!selectEdit);
-  };
+  // const handleEditActivity = () => {
+  //   setSelectedEdit(!selectEdit);
+  // };
 
-  const handleForm = () => {
-    setSelectedEdit(false);
-    setOpenForm(false);
-    setSelectedActivity(undefined);
-  };
+  // const handleForm = () => {
+  //   setSelectedEdit(false);
+  //   setOpenForm(false);
+  //   setSelectedActivity(undefined);
+  // };
 
-  const createOrEditActivity = async (activity: Activity) => {
-    setSubmitting(true);
+  // const createOrEditActivity = async (activity: Activity) => {
+  //   setSubmitting(true);
 
-    if (activity.id) {
-      await agent.Activities.update(activity);
-      setActivities([
-        ...activities.filter(
-          (filteredActivity) => filteredActivity.id !== activity.id
-        ),
-        activity,
-      ]);
-    } else {
-      activity.id = uuid();
-      await agent.Activities.create(activity);
-      setActivities([...activities, activity]);
-    }
+  //   if (activity.id) {
+  //     await agent.Activities.update(activity);
+  //     setActivities([
+  //       ...activities.filter(
+  //         (filteredActivity) => filteredActivity.id !== activity.id
+  //       ),
+  //       activity,
+  //     ]);
+  //   } else {
+  //     activity.id = uuid();
+  //     await agent.Activities.create(activity);
+  //     setActivities([...activities, activity]);
+  //   }
 
-    setSelectedEdit(false);
-    setOpenForm(false);
-    setSelectedActivity(activity);
-    setSubmitting(false);
-  };
+  //   setSelectedEdit(false);
+  //   setOpenForm(false);
+  //   setSelectedActivity(activity);
+  //   setSubmitting(false);
+  // };
 
   const deleteActivity = async (activity: Activity) => {
     setSubmitting(true);
@@ -87,26 +82,20 @@ const ActivityDashboard = ({
       <Grid.Column width={'10'}>
         <ActivityList
           activities={activities}
-          handleSelectActivity={handleSelectActivity}
           deleteActivity={deleteActivity}
           submitting={submitting}
         />
       </Grid.Column>
       <Grid.Column width={'6'}>
-        {selectedActivity && !selectEdit && (
-          <ActivityDetails
-            activity={selectedActivity}
-            handleUnselectActivity={handleUnselectActivity}
-            handleEditActivity={handleEditActivity}
-            selectEdit={selectEdit}
-          />
+        {activityStore.selectedActivity && !activityStore.openForm && (
+          <ActivityDetails />
         )}
-        {(selectEdit || openForm) && (
+        {(activityStore.selectEdit || activityStore.openForm) && (
           // <ActivityForm activity={selectedActivity} />
           <ActivityForm
-            activity={selectedActivity}
-            handleForm={handleForm}
-            createOrEditActivity={createOrEditActivity}
+            activity={activityStore.selectedActivity}
+            handleForm={() => activityStore.handleOpenForm()}
+            // createOrEditActivity={createOrEditActivity}
             submitting={submitting}
           />
         )}
@@ -115,4 +104,4 @@ const ActivityDashboard = ({
   );
 };
 
-export default ActivityDashboard;
+export default observer(ActivityDashboard);

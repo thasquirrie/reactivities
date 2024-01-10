@@ -1,40 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from 'semantic-ui-react';
-import { Activity } from './models/activity';
+import { Activity } from '../models/activity';
 import Navbar from './Navbar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
-import agent from './api/agent';
 import LoadingComponents from './LoadingComponents';
+import { useStore } from '../stores/store';
+import { observer } from 'mobx-react-lite';
 
 function App() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [openForm, setOpenForm] = useState<Boolean>(false);
-  const [loading, setLoading] = useState(true);
+  const { activityStore } = useStore();
 
-  const handleOpenForm = () => {
-    setOpenForm(!openForm);
-  };
+  const [activities, setActivities] = useState<Activity[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await agent.Activities.list();
-      setActivities(data);
-      setLoading(false);
-    };
+    activityStore.loadActivities();
+  }, [activityStore]);
 
-    fetchData();
-  }, []);
-
-  return loading ? (
+  return activityStore.loadingInitial ? (
     <LoadingComponents content='Loading app' />
   ) : (
     <>
-      <Navbar handleOpenForm={handleOpenForm} />
+      <Navbar />
       <Container style={{ marginTop: '7em' }}>
         <ActivityDashboard
-          activities={activities}
-          openForm={openForm}
-          setOpenForm={setOpenForm}
+          activities={activityStore.activities}
           setActivities={setActivities}
         />
       </Container>
@@ -42,4 +31,4 @@ function App() {
   );
 }
 
-export default App;
+export default observer(App);

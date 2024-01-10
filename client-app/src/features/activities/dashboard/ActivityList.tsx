@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
-import { Activity } from '../../../app/layout/models/activity';
+import { Activity } from '../../../app/models/activity';
 import { Button, Item, Label, Segment } from 'semantic-ui-react';
+import { useStore } from '../../../app/stores/store';
 
 interface Props {
   activities: Activity[];
-  handleSelectActivity: (activity: Activity) => void;
+  // handleSelectActivity: (activity: Activity) => void;
+  // handleSelectActivity:
   deleteActivity: (activity: Activity) => void;
   submitting: boolean;
 }
 
 const ActivityList = ({
   activities,
-  handleSelectActivity,
+  // handleSelectActivity,
   deleteActivity,
   submitting,
 }: Props) => {
+  const { activityStore } = useStore();
+
   const [target, setTarget] = useState('');
   return (
     <Segment>
@@ -33,7 +37,7 @@ const ActivityList = ({
               <Item.Extra>
                 <Button
                   onClick={() => {
-                    handleSelectActivity(activity);
+                    activityStore.selectActivity(activity);
                   }}
                   floated='right'
                   content='View'
