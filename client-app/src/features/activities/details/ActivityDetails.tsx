@@ -30,7 +30,6 @@ const ActivityDetails = () => {
           />
           <Button
             onClick={() => {
-              // selectEdit && handleEditActivity();
               cancelSelectActivity();
             }}
             basic

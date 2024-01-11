@@ -4,11 +4,11 @@ import agent from '../api/agent';
 import { v4 as uuid } from 'uuid';
 
 class ActivityStore {
-  activities: Activity[] = [];
+  activityRegistry = new Map<string, Activity>();
   selectedActivity: Activity | undefined = undefined;
   openForm = false;
   loading = false;
-  loadingInitial = false;
+  loadingInitial = true;
   selectEdit = false;
   submitting = false;
 
@@ -17,10 +17,14 @@ class ActivityStore {
   }
 
   loadActivities = async () => {
-    this.setLoadingInitial(true);
     try {
-      this.activities = await agent.Activities.list();
-
+      const activities = await agent.Activities.list();
+      runInAction(() => {
+        activities.forEach((activity) => {
+          activity.date = activity.date.split('T')[0];
+          this.activityRegistry.set(activity.id, activity);
+        });
+      });
       this.setLoadingInitial(false);
     } catch (error) {
       console.log({ error });
@@ -60,7 +64,7 @@ class ActivityStore {
     try {
       await agent.Activities.create(activity);
       runInAction(() => {
-        this.activities.push(activity);
+        this.activityRegistry.set(activity.id, activity);
         this.selectedActivity = activity;
         this.openForm = false;
         this.submitting = false;
@@ -78,7 +82,10 @@ class ActivityStore {
     try {
       await agent.Activities.update(activity);
       runInAction(() => {
+        this.activityRegistry.set(activity.id, activity);
+        this.openForm = false;
         this.submitting = false;
+        this.selectedActivity = activity;
       });
     } catch (error) {
       console.log({ error });
@@ -87,6 +94,29 @@ class ActivityStore {
       });
     }
   };
+
+  deleteActivity = async (activity: Activity) => {
+    this.loading = true;
+    try {
+      await agent.Activities.delete(activity.id);
+      runInAction(() => {
+        this.activityRegistry.set(activity.id, activity);
+        this.selectedActivity = undefined;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.log({ error });
+      runInAction(() => {
+        this.loading = false;
+      });
+    }
+  };
+
+  get activitiesByDate() {
+    return Array.from(this.activityRegistry.values()).sort(
+      (a, b) => Date.parse(a.date) - Date.parse(b.date)
+    );
+  }
 }
 
 // class ActivityStore {
