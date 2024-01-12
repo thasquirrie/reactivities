@@ -8,7 +8,7 @@ class ActivityStore {
   selectedActivity: Activity | undefined = undefined;
   openForm = false;
   loading = false;
-  loadingInitial = true;
+  loadingInitial = false;
   selectEdit = false;
   submitting = false;
 
@@ -17,12 +17,12 @@ class ActivityStore {
   }
 
   loadActivities = async () => {
+    this.setLoadingInitial(true);
     try {
       const activities = await agent.Activities.list();
       runInAction(() => {
         activities.forEach((activity) => {
-          activity.date = activity.date.split('T')[0];
-          this.activityRegistry.set(activity.id, activity);
+          this.setActivity(activity);
         });
       });
       this.setLoadingInitial(false);
@@ -32,30 +32,45 @@ class ActivityStore {
     }
   };
 
+  loadActivity = async (id: string) => {
+    // this.setLoadingInitial(true);
+    let activity = this.getActivity(id);
+
+    if (activity) {
+      this.selectedActivity = activity;
+      return activity;
+    } else {
+      this.setLoadingInitial(true);
+      try {
+        activity = await agent.Activities.details(id);
+        this.setActivity(activity);
+        runInAction(() => {
+          this.selectedActivity = activity;
+        });
+        this.setLoadingInitial(false);
+
+        return activity;
+      } catch (error) {
+        console.log({ error });
+        this.setLoadingInitial(false);
+      }
+    }
+  };
+
+  private getActivity = (id: string) => {
+    return this.activityRegistry.get(id);
+  };
+
+  private setActivity = (activity: Activity) => {
+    activity.date = activity.date.split('T')[0];
+    this.activityRegistry.set(activity.id, activity);
+  };
+
   setLoadingInitial = (state: boolean) => {
     this.loadingInitial = state;
   };
-
-  selectActivity = (activity: Activity) => {
-    this.selectedActivity = activity;
-  };
-
   toggleSelectEdit = () => {
     this.selectEdit = !this.selectEdit;
-  };
-
-  cancelSelectActivity = () => {
-    this.selectedActivity = undefined;
-  };
-
-  handleOpenForm = (activity?: Activity) => {
-    // activity ? this.selectActivity(activity) : this.cancelSelectActivity();
-    this.selectEdit = false;
-    this.openForm = true;
-  };
-
-  closeForm = () => {
-    this.openForm = false;
   };
 
   createActivity = async (activity: Activity) => {
