@@ -33,7 +33,7 @@ const ActivityForm = () => {
 
   useEffect(() => {
     id && loadActivity(id).then((activity) => setActivity(activity!));
-  }, [id, loadActivity, activity]);
+  }, [id, loadActivity]);
 
   const handleOnChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

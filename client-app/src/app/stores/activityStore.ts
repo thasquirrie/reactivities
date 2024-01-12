@@ -41,6 +41,7 @@ class ActivityStore {
       return activity;
     } else {
       this.setLoadingInitial(true);
+
       try {
         activity = await agent.Activities.details(id);
         this.setActivity(activity);
@@ -98,9 +99,9 @@ class ActivityStore {
       await agent.Activities.update(activity);
       runInAction(() => {
         this.activityRegistry.set(activity.id, activity);
+        this.selectedActivity = activity;
         this.openForm = false;
         this.submitting = false;
-        this.selectedActivity = activity;
       });
     } catch (error) {
       console.log({ error });
@@ -115,8 +116,8 @@ class ActivityStore {
     try {
       await agent.Activities.delete(activity.id);
       runInAction(() => {
-        this.activityRegistry.set(activity.id, activity);
-        this.selectedActivity = undefined;
+        this.activityRegistry.delete(activity.id);
+        // this.selectedActivity = undefined;
         this.loading = false;
       });
     } catch (error) {
@@ -132,21 +133,20 @@ class ActivityStore {
       (a, b) => Date.parse(a.date) - Date.parse(b.date)
     );
   }
+
+  get groupedActivities() {
+    console.log('Length:', this.activitiesByDate.length);
+    return Object.entries(
+      this.activitiesByDate.reduce((activities, activity) => {
+        const date = activity.date;
+        activities[date] = activities[date]
+          ? [...activities[date], activity]
+          : [activity];
+
+        return activities;
+      }, {} as { [key: string]: Activity[] })
+    );
+  }
 }
-
-// class ActivityStore {
-//   title = 'Hello from MobX';
-
-//   constructor() {
-//     makeObservable(this, {
-//       title: observable,
-//       setTitle: action,
-//     });
-//   }
-
-//   setTitle = () => {
-//     this.title = this.title + '!';
-//   };
-// }
 
 export default ActivityStore;
