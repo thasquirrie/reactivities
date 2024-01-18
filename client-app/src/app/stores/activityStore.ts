@@ -20,6 +20,7 @@ class ActivityStore {
     this.setLoadingInitial(true);
     try {
       const activities = await agent.Activities.list();
+      console.log({ activities });
       runInAction(() => {
         activities.forEach((activity) => {
           this.setActivity(activity);
@@ -135,7 +136,6 @@ class ActivityStore {
   }
 
   get groupedActivities() {
-    console.log('Length:', this.activitiesByDate.length);
     return Object.entries(
       this.activitiesByDate.reduce((activities, activity) => {
         const date = activity.date;

@@ -8,8 +8,6 @@ import { Fragment } from 'react';
 const ActivityList = () => {
   const { activityStore } = useStore();
 
-  console.log('Grouped:', activityStore.groupedActivities);
-
   return (
     <>
       {activityStore.groupedActivities.map(([group, activities]) => (
